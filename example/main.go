@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	paginate "github.com/gobeam/mongo-go-pagination"
+	paginate "github.com/adipurnama/mongo-go-pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +23,7 @@ type Product struct {
 func main() {
 	// Establishing mongo db connection
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://root:example@localhost:27017"))
 	if err != nil {
 		panic(err)
 	}

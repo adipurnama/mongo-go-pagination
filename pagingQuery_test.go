@@ -1,4 +1,4 @@
-package mongopagination
+package mongopagination_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	pagination "github.com/adipurnama/mongo-go-pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,7 +21,7 @@ type TodoTest struct {
 }
 
 const (
-	DatabaseHost       string = "mongodb://localhost:27017"
+	DatabaseHost       string = "mongodb://root:example@localhost:27017"
 	DatabaseName       string = "todo"
 	DatabaseCollection string = "TodoTest"
 )
@@ -68,7 +69,7 @@ func TestPagingQuery_Find(t *testing.T) {
 		{"status", 1},
 	}
 	collection := db.Collection(DatabaseCollection)
-	paginatedData, err := New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Filter(filter).Find(context.TODO())
+	paginatedData, err := pagination.New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Filter(filter).Find(context.TODO())
 
 	if err != nil {
 		t.Errorf("Error while pagination. Error: %s", err.Error())
@@ -87,13 +88,13 @@ func TestPagingQuery_Find(t *testing.T) {
 	}
 
 	// no limit or page provided error
-	_, noLimitOrPageError := New(collection).Sort("price", -1).Select(projection).Filter(filter).Find(context.TODO())
+	_, noLimitOrPageError := pagination.New(collection).Sort("price", -1).Select(projection).Filter(filter).Find(context.TODO())
 	if noLimitOrPageError == nil {
 		t.Errorf("Error expected but got no error")
 	}
 
 	// no filter error
-	_, noFilterError := New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Find(context.TODO())
+	_, noFilterError := pagination.New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Find(context.TODO())
 	if noFilterError == nil {
 		t.Errorf("Error expected but got no error")
 	}
@@ -105,7 +106,7 @@ func TestPagingQuery_Find(t *testing.T) {
 	// Aggregate pipeline pagination test
 	match := bson.M{"$match": bson.M{"status": "active"}}
 
-	aggPaginatedData, err := New(collection).Limit(limit).Page(page).Sort("price", -1).Aggregate(context.TODO(), match)
+	aggPaginatedData, err := pagination.New(collection).Limit(limit).Page(page).Sort("price", -1).Aggregate(context.TODO(), match)
 	if err != nil {
 		t.Errorf("Error while Aggregation pagination. Error: %s", err.Error())
 	}
@@ -117,25 +118,25 @@ func TestPagingQuery_Find(t *testing.T) {
 
 	// Aggregation error match query test
 	faultyMatch := bson.M{"$matches": bson.M{"status": "active"}}
-	_, faultyMatchQuery := New(collection).Sort("price", -1).Aggregate(context.TODO(), faultyMatch)
+	_, faultyMatchQuery := pagination.New(collection).Sort("price", -1).Aggregate(context.TODO(), faultyMatch)
 	if faultyMatchQuery == nil {
 		t.Errorf("Error expected but got no error")
 	}
 
 	// no limit or page provided error
-	_, noLimitOrPageAggError := New(collection).Sort("price", -1).Aggregate(context.TODO(), match)
+	_, noLimitOrPageAggError := pagination.New(collection).Sort("price", -1).Aggregate(context.TODO(), match)
 	if noLimitOrPageAggError == nil {
 		t.Errorf("Error expected but got no error")
 	}
 
 	// filter in aggregate error
-	_, noFilterAggError := New(collection).Limit(limit).Page(page).Filter(filter).Sort("price", -1).Aggregate(context.TODO(), match)
+	_, noFilterAggError := pagination.New(collection).Limit(limit).Page(page).Filter(filter).Sort("price", -1).Aggregate(context.TODO(), match)
 	if noFilterAggError == nil {
 		t.Errorf("Error expected but got no error")
 	}
 
 	// without sorting test
-	_, sortProvideTest := New(collection).Aggregate(context.TODO(), match)
+	_, sortProvideTest := pagination.New(collection).Aggregate(context.TODO(), match)
 	if sortProvideTest == nil {
 		t.Errorf("data expected")
 		return

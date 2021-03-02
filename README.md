@@ -26,7 +26,7 @@ package main
 import (
 	"context"
 	"fmt"
-	. "github.com/gobeam/mongo-go-pagination"
+	. "github.com/adipurnama/mongo-go-pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

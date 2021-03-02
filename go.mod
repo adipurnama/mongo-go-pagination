@@ -1,8 +1,8 @@
-module github.com/gobeam/mongo-go-pagination
+module github.com/adipurnama/mongo-go-pagination
 
-go 1.13
+go 1.15
 
 require (
-	github.com/pkg/errors v0.8.1
-	go.mongodb.org/mongo-driver v1.3.1
+	github.com/pkg/errors v0.9.1
+	go.mongodb.org/mongo-driver v1.4.6
 )
