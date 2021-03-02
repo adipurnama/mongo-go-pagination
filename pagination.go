@@ -37,9 +37,11 @@ func (p *Paginator) PaginationData() *PaginationData {
 		Next:      0,
 		TotalPage: p.TotalPage,
 	}
+
 	if p.Page != p.PrevPage && p.TotalRecord > 0 {
 		data.Prev = p.PrevPage
 	}
+
 	if p.Page != p.NextPage && p.TotalRecord > 0 && p.Page <= p.TotalPage {
 		data.Next = p.NextPage
 	}
@@ -50,11 +52,17 @@ func (p *Paginator) PaginationData() *PaginationData {
 // Paging returns Paginator struct which hold pagination
 // stats
 func Paging(p *pagingQuery, paginationInfo chan<- *Paginator, aggregate bool, aggCount int64) {
-	var paginator Paginator
-	var offset int64
-	var count int64
+	var (
+		paginator Paginator
+		offset    int64
+		count     int64
+	)
+
 	if !aggregate {
-		count, _ = p.Collection.CountDocuments(context.Background(), p.FilterQuery)
+		ctx, cancel := context.WithTimeout(context.Background(), p.PagingCountDur)
+		defer cancel()
+
+		count, _ = p.Collection.CountDocuments(ctx, p.FilterQuery)
 	} else {
 		count = aggCount
 	}
@@ -64,20 +72,24 @@ func Paging(p *pagingQuery, paginationInfo chan<- *Paginator, aggregate bool, ag
 	} else {
 		offset = 0
 	}
+
 	paginator.TotalRecord = count
 	paginator.Page = p.PageCount
 	paginator.Offset = offset
 	paginator.Limit = p.LimitCount
 	paginator.TotalPage = int64(math.Ceil(float64(count) / float64(p.LimitCount)))
+
 	if p.PageCount > 1 {
 		paginator.PrevPage = p.PageCount - 1
 	} else {
 		paginator.PrevPage = p.PageCount
 	}
+
 	if p.PageCount == paginator.TotalPage {
 		paginator.NextPage = p.PageCount
 	} else {
 		paginator.NextPage = p.PageCount + 1
 	}
+
 	paginationInfo <- &paginator
 }

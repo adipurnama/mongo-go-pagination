@@ -2,7 +2,7 @@
 [![Build][Build-Status-Image]][Build-Status-Url] [![Go Report Card](https://goreportcard.com/badge/github.com/gobeam/mongo-go-pagination?branch=master&kill_cache=1)](https://goreportcard.com/report/github.com/gobeam/mongo-go-pagination) [![GoDoc][godoc-image]][godoc-url]
 [![Coverage Status](https://coveralls.io/repos/github/gobeam/mongo-go-pagination/badge.svg?branch=master)](https://coveralls.io/github/gobeam/mongo-go-pagination?branch=master)
 
-For all your simple query to aggregation pipeline this is simple and easy to use Pagination driver with information like Total, Page, PerPage, Prev, Next, TotalPage and your actual mongo result. 
+For all your simple query to aggregation pipeline this is simple and easy to use Pagination driver with information like Total, Page, PerPage, Prev, Next, TotalPage and your actual mongo result.
 
 
 ## Install
@@ -48,7 +48,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	var limit int64 = 10
 	var page int64 = 1
 	collection := client.Database("myaggregate").Collection("stocks")
@@ -110,31 +110,31 @@ func main() {
     		{"qty", 1},
     	}
     	// Querying paginated data
-    	// Sort and select are optional
-    	paginatedData, err := New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Filter(filter).Find()
+    	// Sort, WithPagingCountTimeout and select are optional
+    	paginatedData, err := New(collection).WithPagingCountTimeout(4*time.Second).Limit(limit).Page(page).Sort("price", -1).Select(projection).Filter(filter).Find()
     	if err != nil {
     		panic(err)
     	}
-    
+
     	// paginated data is in paginatedData.Data
     	// pagination info can be accessed in  paginatedData.Pagination
     	// if you want to marshal data to your defined struct
-    
+
     	var lists []Product
     	for _, raw := range paginatedData.Data {
     		var product *Product
     		if marshallErr := bson.Unmarshal(raw, &product); marshallErr == nil {
     			lists = append(lists, *product)
     		}
-    
+
     	}
     	// print ProductList
     	fmt.Printf("Norm Find Data: %+v\n", lists)
-    
+
     	// print pagination data
     	fmt.Printf("Normal find pagination info: %+v\n", paginatedData.Pagination)
 }
-    
+
 ```
 
 ## Running the tests

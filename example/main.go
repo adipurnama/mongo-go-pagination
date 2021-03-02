@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	paginate "github.com/gobeam/mongo-go-pagination"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 // Product struct
@@ -36,8 +37,12 @@ func main() {
 		{"name", 1},
 		{"qty", 1},
 	}
+
 	// Querying paginated data
-	paginatedData, err := paginate.New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Filter(filter).Find()
+	qCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	paginatedData, err := paginate.New(collection).Limit(limit).Page(page).Sort("price", -1).Select(projection).Filter(filter).Find(qCtx)
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +76,7 @@ func main() {
 	// you can easily chain function and pass multiple query like here we are passing match
 	// query and projection query as params in Aggregate function you cannot use filter with Aggregate
 	// because you can pass filters directly through Aggregate param
-	aggPaginatedData, err := paginate.New(collection).Limit(limit).Page(page).Sort("price", -1).Aggregate(match, projectQuery)
+	aggPaginatedData, err := paginate.New(collection).Limit(limit).Page(page).Sort("price", -1).Aggregate(qCtx, match, projectQuery)
 	if err != nil {
 		panic(err)
 	}
